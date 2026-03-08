@@ -10,8 +10,8 @@ CHAT_ID        = os.environ.get("CHAT_ID",        "SEM_VLOZ_SVOJE_CHAT_ID")
 
 # Časy kedy chceš dostávať notifikácie (24h formát)
 NOTIFY_TIMES = [
-    "07:30",
-    "19:30",
+    "06:30",
+    "18:30",
 ]
 # ────────────────────────────────────────────────────────────
 
