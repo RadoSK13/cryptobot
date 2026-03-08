@@ -19,25 +19,21 @@ NOTIFY_TIMES = [
 def get_prices():
     """Stiahne ceny z Binance + EUR kurz z Frankfurter."""
     try:
-        btc_usd = float(requests.get(
-            "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT", timeout=10
-        ).json()["price"])
-
-        sol_usd = float(requests.get(
-            "https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT", timeout=10
-        ).json()["price"])
-
-        btc_24h = float(requests.get(
+        btc_resp = requests.get(
             "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT", timeout=10
-        ).json()["priceChangePercent"])
-
-        sol_24h = float(requests.get(
+        ).json()
+        sol_resp = requests.get(
             "https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT", timeout=10
-        ).json()["priceChangePercent"])
+        ).json()
 
         eur_rate = requests.get(
             "https://api.frankfurter.app/latest?from=USD&to=EUR", timeout=10
         ).json()["rates"]["EUR"]
+
+        btc_usd = float(btc_resp["lastPrice"])
+        sol_usd = float(sol_resp["lastPrice"])
+        btc_24h = float(btc_resp["priceChangePercent"])
+        sol_24h = float(sol_resp["priceChangePercent"])
 
         return {
             "btc_usd": btc_usd,
