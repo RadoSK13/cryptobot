@@ -17,22 +17,35 @@ NOTIFY_TIMES = [
 
 
 def get_prices():
-    """Stiahne ceny z CoinGecko (funguje zo serverov bez obmedzení)."""
+    """Stiahne ceny z KuCoin + EUR kurz z Frankfurter."""
     try:
-        resp = requests.get(
-            "https://api.coingecko.com/api/v3/simple/price"
-            "?ids=bitcoin,solana&vs_currencies=eur,usd&include_24hr_change=true",
-            timeout=15,
-            headers={"User-Agent": "CryptoAlertBot/1.0"}
-        ).json()
+        btc_resp = requests.get(
+            "https://api.kucoin.com/api/v1/market/stats?symbol=BTC-USDT",
+            timeout=15, headers={"User-Agent": "Mozilla/5.0"}
+        ).json()["data"]
+
+        sol_resp = requests.get(
+            "https://api.kucoin.com/api/v1/market/stats?symbol=SOL-USDT",
+            timeout=15, headers={"User-Agent": "Mozilla/5.0"}
+        ).json()["data"]
+
+        eur_rate = requests.get(
+            "https://api.frankfurter.app/latest?from=USD&to=EUR",
+            timeout=15
+        ).json()["rates"]["EUR"]
+
+        btc_usd = float(btc_resp["last"])
+        sol_usd = float(sol_resp["last"])
+        btc_24h = float(btc_resp["changeRate"]) * 100
+        sol_24h = float(sol_resp["changeRate"]) * 100
 
         return {
-            "btc_usd": resp["bitcoin"]["usd"],
-            "btc_eur": resp["bitcoin"]["eur"],
-            "btc_24h": resp["bitcoin"]["usd_24h_change"],
-            "sol_usd": resp["solana"]["usd"],
-            "sol_eur": resp["solana"]["eur"],
-            "sol_24h": resp["solana"]["usd_24h_change"],
+            "btc_usd": btc_usd,
+            "btc_eur": btc_usd * eur_rate,
+            "btc_24h": btc_24h,
+            "sol_usd": sol_usd,
+            "sol_eur": sol_usd * eur_rate,
+            "sol_24h": sol_24h,
         }
     except Exception as e:
         print(f"Chyba pri načítaní cien: {e}")
