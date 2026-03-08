@@ -10,38 +10,29 @@ CHAT_ID        = os.environ.get("CHAT_ID",        "SEM_VLOZ_SVOJE_CHAT_ID")
 
 # Časy kedy chceš dostávať notifikácie (24h formát)
 NOTIFY_TIMES = [
-    "08:00",
-    "20:00",
+    "07:30",
+    "19:30",
 ]
 # ────────────────────────────────────────────────────────────
 
 
 def get_prices():
-    """Stiahne ceny z Binance + EUR kurz z Frankfurter."""
+    """Stiahne ceny z CoinGecko (funguje zo serverov bez obmedzení)."""
     try:
-        btc_resp = requests.get(
-            "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT", timeout=10
+        resp = requests.get(
+            "https://api.coingecko.com/api/v3/simple/price"
+            "?ids=bitcoin,solana&vs_currencies=eur,usd&include_24hr_change=true",
+            timeout=15,
+            headers={"User-Agent": "CryptoAlertBot/1.0"}
         ).json()
-        sol_resp = requests.get(
-            "https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT", timeout=10
-        ).json()
-
-        eur_rate = requests.get(
-            "https://api.frankfurter.app/latest?from=USD&to=EUR", timeout=10
-        ).json()["rates"]["EUR"]
-
-        btc_usd = float(btc_resp["lastPrice"])
-        sol_usd = float(sol_resp["lastPrice"])
-        btc_24h = float(btc_resp["priceChangePercent"])
-        sol_24h = float(sol_resp["priceChangePercent"])
 
         return {
-            "btc_usd": btc_usd,
-            "btc_eur": btc_usd * eur_rate,
-            "btc_24h": btc_24h,
-            "sol_usd": sol_usd,
-            "sol_eur": sol_usd * eur_rate,
-            "sol_24h": sol_24h,
+            "btc_usd": resp["bitcoin"]["usd"],
+            "btc_eur": resp["bitcoin"]["eur"],
+            "btc_24h": resp["bitcoin"]["usd_24h_change"],
+            "sol_usd": resp["solana"]["usd"],
+            "sol_eur": resp["solana"]["eur"],
+            "sol_24h": resp["solana"]["usd_24h_change"],
         }
     except Exception as e:
         print(f"Chyba pri načítaní cien: {e}")
@@ -113,4 +104,3 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
